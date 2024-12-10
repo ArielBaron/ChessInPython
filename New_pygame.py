@@ -39,6 +39,8 @@ BOARD_START_Y = (WINDOW_HEIGHT - BOARD_HEIGHT) // 2
 
 FONT = pygame.font.Font(None, 36)
 
+def get_piece_from_square(square):
+    return reverse_chessboard(current_Board)[square[1] * 8 + square[0]]
 
 def get_square_from_mouse(pos):
     x, y = pos
@@ -51,9 +53,21 @@ def get_square_from_mouse(pos):
     return None, None
 
 
-def reverse_board(board):
-    reversed_board = "/".join(reversed(board.split("/")))
-    return reversed_board
+def reverse_chessboard(chessboard):
+    # Validate that the input is 64 elements long
+    if len(chessboard) != 64:
+        raise ValueError("The chessboard must have exactly 64 elements.")
+
+    # Split the flat list into 8 rows
+    rows = [chessboard[i:i+8] for i in range(0, len(chessboard), 8)]
+
+    # Reverse the order of the rows
+    revised_board = rows[::-1]
+
+    # Flatten the revised board back into a 1D list
+    flattened_board = [piece for row in revised_board for piece in row]
+
+    return flattened_board
 
 
 def fen_to_Chess_board(board):
@@ -99,11 +113,13 @@ def DrawBoard(real_board):
     WINDOW.fill("aqua")
     mouse_pos = pygame.mouse.get_pos()
     col, row = get_square_from_mouse(mouse_pos)
-
     # Update label with the current column and row
     col_row_text = f'cols and rows: {col+1}, {row+1}' if col is not None and row is not None else 'N/A'
     WINDOW.blit(FONT.render(f'Mouse pos: {mouse_pos}', True, "darkgray"), (WINDOW_WIDTH - 500, 0))
     WINDOW.blit(FONT.render(col_row_text, True, "darkgray"), (WINDOW_WIDTH - 300, 200))
+    if type(selected_square) == tuple:
+        WINDOW.blit(FONT.render(f'{get_piece_from_square(selected_square)}', True, "darkgray"), (WINDOW_WIDTH - 300, 300))
+
 
     for row in range(8):
         for col in range(8):
@@ -126,6 +142,7 @@ def DrawBoard(real_board):
                 
 def MainGameLoop():
     global selected_square
+    global current_Board
     while True:
         CLOCK.tick(FPS)
         for event in pygame.event.get():
@@ -139,6 +156,7 @@ def MainGameLoop():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     selected_square = (get_square_from_mouse(pygame.mouse.get_pos()))
+                    
                 
 
 
