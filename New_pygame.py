@@ -101,7 +101,7 @@ def DrawBoard(real_board):
     col, row = get_square_from_mouse(mouse_pos)
 
     # Update label with the current column and row
-    col_row_text = f'cols and rows: {col+1}, {row+1}' if col is not None and row is not None else 'cols: N/A'
+    col_row_text = f'cols and rows: {col+1}, {row+1}' if col is not None and row is not None else 'N/A'
     WINDOW.blit(FONT.render(f'Mouse pos: {mouse_pos}', True, "darkgray"), (WINDOW_WIDTH - 500, 0))
     WINDOW.blit(FONT.render(col_row_text, True, "darkgray"), (WINDOW_WIDTH - 300, 200))
 
@@ -110,13 +110,14 @@ def DrawBoard(real_board):
             square_number = row * 8 + col
             currentRect = BOARD_START_X + col * SQUARE_SIZE, BOARD_START_Y + row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE
             # Draw Squares
-            if selected_square is not None and row==selected_square[0] and col==selected_square[1]:
-                pygame.draw.rect(WINDOW, "red", currentRect)
-                print("YES")
-            elif (row + col) % 2 == 0:  # Check if the square is even
+            
+            if (row + col) % 2 == 0:  # Check if the square is even
                 pygame.draw.rect(WINDOW, GREEN, currentRect)  # Draw a green square
             else:
                 pygame.draw.rect(WINDOW, WHITE, currentRect)  # Draw a white square
+            if selected_square != (None, None) and selected_square != None:
+                if  selected_square[1] * 8 + selected_square[0] == (7 - row) * 8 + col:
+                    pygame.draw.rect(WINDOW, "red", currentRect)    
             # Handle Pieces
             if game_board[square_number] != "0":
                 piece_dict = {'K': K, 'k': k, 'P': P, "p": p, 'R': R, 'r': r, 'N': N, 'n': n, 'B': B, 'b': b, 'Q': Q, 'q': q}
@@ -138,7 +139,6 @@ def MainGameLoop():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     selected_square = (get_square_from_mouse(pygame.mouse.get_pos()))
-                    print(selected_square)
                 
 
 
