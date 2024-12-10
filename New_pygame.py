@@ -156,6 +156,14 @@ def MainGameLoop():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     selected_square = (get_square_from_mouse(pygame.mouse.get_pos()))
+                    piece = get_piece_from_square(selected_square)
+                    if piece.isupper and turn == 'w':
+                        #TODO ALL OF THIS
+                        has_selected = True
+
+                        moves = genrate_moves(piece)
+
+                        play_move(move)
                     
                 
 
