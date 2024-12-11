@@ -1,6 +1,6 @@
 import pygame
 import os
-
+from move_gen import get_valid_moves
 
 # Constants
 pygame.init()
@@ -117,9 +117,9 @@ def DrawBoard(real_board):
     col_row_text = f'cols and rows: {col+1}, {row+1}' if col is not None and row is not None else 'N/A'
     WINDOW.blit(FONT.render(f'Mouse pos: {mouse_pos}', True, "darkgray"), (WINDOW_WIDTH - 500, 0))
     WINDOW.blit(FONT.render(col_row_text, True, "darkgray"), (WINDOW_WIDTH - 300, 200))
-    if type(selected_square) == tuple:
+    if selected_square is not None:
         WINDOW.blit(FONT.render(f'{get_piece_from_square(selected_square)}', True, "darkgray"), (WINDOW_WIDTH - 300, 300))
-
+    WINDOW.blit(FONT.render(f"{moves_text}", True, "darkgray"), (WINDOW_WIDTH - 300, 400))
 
     for row in range(8):
         for col in range(8):
@@ -143,6 +143,9 @@ def DrawBoard(real_board):
 def MainGameLoop():
     global selected_square
     global current_Board
+    global moves_text
+    has_selected = False
+    start_end_squares = [None,None]
     while True:
         CLOCK.tick(FPS)
         for event in pygame.event.get():
@@ -154,25 +157,26 @@ def MainGameLoop():
                     pygame.quit()
                     exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    selected_square = (get_square_from_mouse(pygame.mouse.get_pos()))
-                    piece = get_piece_from_square(selected_square)
-                    if piece.isupper and turn == 'w':
-                        #TODO ALL OF THIS
+                if event.button == 1:  # Left mouse button click
+                    # If nothing is selected yet, handle the first click
+                    if get_square_from_mouse(pygame.mouse.get_pos()) != (None, None) and not has_selected:
+                        selected_square = get_square_from_mouse(pygame.mouse.get_pos())
+                        start_end_squares[0] = selected_square
                         has_selected = True
-
-                        moves = genrate_moves(piece)
-
-                        play_move(move)
-                    
-                
-
-
+                        piece = get_piece_from_square(selected_square)
+                        valid_moves = get_valid_moves(current_Board,castles,en_passant,piece,selected_square)
+                        moves_text = f'From: {selected_square} TO: {valid_moves}'
+                    # If something is already selected, handle the second click
+                    elif has_selected and get_square_from_mouse(pygame.mouse.get_pos()) != (None, None):
+                        start_end_squares[1] = get_square_from_mouse(pygame.mouse.get_pos())
+                        has_selected = False 
+                        
         DrawBoard(current_Board)  # Call the DrawBoard function to draw the chessboard
         pygame.display.flip()  # Update the display
 
 
 # RUN THE GAME
+moves_text = "Moves: "
 current_Board = fen_to_Chess_board(STARTING_POSTIONS[0])
 turn = 'w'
 castles = "KQkq"
